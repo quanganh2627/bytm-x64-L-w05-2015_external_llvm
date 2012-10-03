@@ -239,6 +239,12 @@ namespace llvm {
       // VSHL, VSRL - 128-bit vector logical left / right shift
       VSHLDQ, VSRLDQ,
 
+      // VZEXT - Vector integer zero-extend.
+      VZEXT,
+
+      // VSEXT - Vector integer signed-extend.
+      VSEXT,
+
       // VSHL, VSRL, VSRA - Vector shift elements
       VSHL, VSRL, VSRA,
 
@@ -840,6 +846,7 @@ namespace llvm {
     SDValue buildFromShuffleMostly(SDValue Op, SelectionDAG &DAG) const;
 
     SDValue LowerVectorFpExtend(SDValue &Op, SelectionDAG &DAG) const;
+	SDValue lowerVectorIntExtend(SDValue Op, SelectionDAG &DAG) const;
 
     virtual SDValue
       LowerFormalArguments(SDValue Chain,
