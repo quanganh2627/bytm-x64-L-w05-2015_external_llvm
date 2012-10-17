@@ -5311,10 +5311,6 @@ SDValue DAGCombiner::visitTRUNCATE(SDNode *N) {
     if (Reduced.getNode())
       return Reduced;
   }
-  // fold (trunc (fptoXi x)) -> (smaller fptoXi x)
-  if ((N0.getOpcode() == ISD::FP_TO_UINT ||
-       N0.getOpcode() == ISD::FP_TO_SINT) && !LegalTypes)
-    return DAG.getNode(N0.getOpcode(), N->getDebugLoc(), VT, N0.getOperand(0));
   // fold (trunc (concat ... x ...)) -> (concat ..., (trunc x), ...)),
   // where ... are all 'undef'.
   if (N0.getOpcode() == ISD::CONCAT_VECTORS && !LegalTypes) {

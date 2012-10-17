@@ -833,10 +833,11 @@ namespace llvm {
     SDValue LowerSIGN_EXTEND_INREG(SDValue Op, SelectionDAG &DAG) const;
     SDValue PerformTruncateCombine(SDNode* N, SelectionDAG &DAG, DAGCombinerInfo &DCI) const;
 
-    // Utility functions to help LowerVECTOR_SHUFFLE
+    // Utility functions to help LowerVECTOR_SHUFFLE & LowerBUILD_VECTOR
     SDValue LowerVECTOR_SHUFFLEv8i16(SDValue Op, SelectionDAG &DAG) const;
     SDValue LowerVectorBroadcast(SDValue &Op, SelectionDAG &DAG) const;
     SDValue NormalizeVectorShuffle(SDValue Op, SelectionDAG &DAG) const;
+    SDValue buildFromShuffleMostly(SDValue Op, SelectionDAG &DAG) const;
 
     SDValue LowerVectorFpExtend(SDValue &Op, SelectionDAG &DAG) const;
 
