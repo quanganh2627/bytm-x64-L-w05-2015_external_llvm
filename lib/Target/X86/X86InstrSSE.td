@@ -2139,7 +2139,12 @@ let Predicates = [HasAVX] in {
 }
 
 let Predicates = [UseSSE2] in {
-  // Match fextend for 128 conversions
+  // Match fround and fextend for 128 conversions
+  def : Pat<(v4f32 (X86vfpround (v2f64 VR128:$src))),
+            (CVTPD2PSrr VR128:$src)>;
+  def : Pat<(v4f32 (X86vfpround (memopv2f64 addr:$src))),
+            (CVTPD2PSrm addr:$src)>;
+
   def : Pat<(v2f64 (X86vfpext (v4f32 VR128:$src))),
             (CVTPS2PDrr VR128:$src)>;
 }
