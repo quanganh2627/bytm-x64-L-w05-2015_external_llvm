@@ -933,6 +933,8 @@ X86TargetLowering::X86TargetLowering(X86TargetMachine &TM)
     setOperationAction(ISD::FP_TO_SINT,         MVT::v4i32, Legal);
     setOperationAction(ISD::SINT_TO_FP,         MVT::v4i32, Legal);
 
+    setOperationAction(ISD::UINT_TO_FP,         MVT::v4i8,  Custom);
+    setOperationAction(ISD::UINT_TO_FP,         MVT::v4i16, Custom);
 
     setOperationAction(ISD::FP_EXTEND,          MVT::v2f32, Custom);
     setOperationAction(ISD::FP_ROUND,           MVT::v2f32, Custom);
@@ -1049,6 +1051,10 @@ X86TargetLowering::X86TargetLowering(X86TargetMachine &TM)
     setOperationAction(ISD::FP_ROUND,           MVT::v4f32, Legal);
 
     setLoadExtAction(ISD::EXTLOAD,              MVT::v4f32, Legal);
+
+    setOperationAction(ISD::ZERO_EXTEND,        MVT::v8i32, Custom);
+    setOperationAction(ISD::UINT_TO_FP,         MVT::v8i8,  Custom);
+    setOperationAction(ISD::UINT_TO_FP,         MVT::v8i16, Custom);
 
     setOperationAction(ISD::SRL,               MVT::v16i16, Custom);
     setOperationAction(ISD::SRL,               MVT::v32i8, Custom);
@@ -8145,10 +8151,28 @@ SDValue X86TargetLowering::LowerUINT_TO_FP_i32(SDValue Op,
   return Sub;
 }
 
+SDValue X86TargetLowering::lowerUINT_TO_FP_vec(SDValue Op,
+                                               SelectionDAG &DAG) const {
+  SDValue N0 = Op.getOperand(0);
+  EVT SVT = N0.getValueType();
+  DebugLoc dl = Op.getDebugLoc();
+
+  assert((SVT == MVT::v4i8 || SVT == MVT::v4i16 ||
+          SVT == MVT::v8i8 || SVT == MVT::v8i16) &&
+         "Custom UINT_TO_FP is not supported!");
+
+  EVT NVT = EVT::getVectorVT(*DAG.getContext(), MVT::i32, SVT.getVectorNumElements());
+  return DAG.getNode(ISD::SINT_TO_FP, dl, Op.getValueType(),
+                     DAG.getNode(ISD::ZERO_EXTEND, dl, NVT, N0));
+}
+
 SDValue X86TargetLowering::LowerUINT_TO_FP(SDValue Op,
                                            SelectionDAG &DAG) const {
   SDValue N0 = Op.getOperand(0);
   DebugLoc dl = Op.getDebugLoc();
+
+  if (Op.getValueType().isVector())
+    return lowerUINT_TO_FP_vec(Op, DAG);
 
   // Since UINT_TO_FP is legal (it's marked custom), dag combiner won't
   // optimize it to a SINT_TO_FP when the sign bit is known zero. Perform
@@ -8321,6 +8345,30 @@ FP_TO_INTHelper(SDValue Op, SelectionDAG &DAG, bool IsSigned, bool IsReplace) co
       : DAG.getMergeValues(Ops, 2, DL);
     return std::make_pair(pair, SDValue());
   }
+}
+
+SDValue X86TargetLowering::lowerZERO_EXTEND(SDValue Op, SelectionDAG &DAG) const {
+  DebugLoc DL = Op.getDebugLoc();
+  EVT VT = Op.getValueType();
+  SDValue In = Op.getOperand(0);
+  EVT SVT = In.getValueType();
+
+  if (!VT.is256BitVector() || !SVT.is128BitVector() ||
+      VT.getVectorNumElements() != SVT.getVectorNumElements())
+    return SDValue();
+
+  assert(Subtarget->hasAVX() && "256-bit vector is observed without AVX!");
+
+  // AVX2 has better support of integer extending.
+  if (Subtarget->hasAVX2())
+    return DAG.getNode(X86ISD::VZEXT, DL, VT, In);
+
+  SDValue Lo = DAG.getNode(X86ISD::VZEXT, DL, MVT::v4i32, In);
+  static const int Mask[] = {4, 5, 6, 7, -1, -1, -1, -1};
+  SDValue Hi = DAG.getNode(X86ISD::VZEXT, DL, MVT::v4i32,
+                           DAG.getVectorShuffle(MVT::v8i16, DL, In, DAG.getUNDEF(MVT::v8i16), &Mask[0]));
+
+  return DAG.getNode(ISD::CONCAT_VECTORS, DL, MVT::v8i32, Lo, Hi);
 }
 
 SDValue X86TargetLowering::LowerFP_TO_SINT(SDValue Op,
@@ -11464,6 +11512,7 @@ SDValue X86TargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   case ISD::SRL_PARTS:          return LowerShiftParts(Op, DAG);
   case ISD::SINT_TO_FP:         return LowerSINT_TO_FP(Op, DAG);
   case ISD::UINT_TO_FP:         return LowerUINT_TO_FP(Op, DAG);
+  case ISD::ZERO_EXTEND:        return lowerZERO_EXTEND(Op, DAG);
   case ISD::FP_TO_SINT:         return LowerFP_TO_SINT(Op, DAG);
   case ISD::FP_TO_UINT:         return LowerFP_TO_UINT(Op, DAG);
   case ISD::FP_EXTEND:          return lowerFP_EXTEND(Op, DAG);
