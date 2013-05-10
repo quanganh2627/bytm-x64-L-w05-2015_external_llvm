@@ -2082,16 +2082,20 @@ SDValue DAGTypeLegalizer::WidenVecRes_VSETCC(SDNode *N) {
 //===----------------------------------------------------------------------===//
 // Widen Vector Operand
 //===----------------------------------------------------------------------===//
-bool DAGTypeLegalizer::WidenVectorOperand(SDNode *N, unsigned ResNo) {
-  DEBUG(dbgs() << "Widen node operand " << ResNo << ": ";
+bool DAGTypeLegalizer::WidenVectorOperand(SDNode *N, unsigned OpNo) {
+  DEBUG(dbgs() << "Widen node operand " << OpNo << ": ";
         N->dump(&DAG);
         dbgs() << "\n");
   SDValue Res = SDValue();
 
+  // See if the target wants to custom widen this node.
+  if (CustomLowerNode(N, N->getOperand(OpNo).getValueType(), false))
+    return false;
+
   switch (N->getOpcode()) {
   default:
 #ifndef NDEBUG
-    dbgs() << "WidenVectorOperand op #" << ResNo << ": ";
+    dbgs() << "WidenVectorOperand op #" << OpNo << ": ";
     N->dump(&DAG);
     dbgs() << "\n";
 #endif
@@ -2377,6 +2381,11 @@ SDValue DAGTypeLegalizer::GenWidenVectorLoads(SmallVector<SDValue, 16> &LdChain,
 
   int LdWidth = LdVT.getSizeInBits();
   int WidthDiff = WidenWidth - LdWidth;          // Difference
+
+  if (!LdVT.isPow2VectorType()) {
+    Align = 1; // Force unaligned load of widen vector
+  }
+
   unsigned LdAlign = (isVolatile) ? 0 : Align; // Allow wider loads
 
   // Find the vector type that can load from.
@@ -2576,6 +2585,10 @@ void DAGTypeLegalizer::GenWidenVectorStores(SmallVector<SDValue, 16>& StChain,
   EVT ValEltVT = ValVT.getVectorElementType();
   unsigned ValEltWidth = ValEltVT.getSizeInBits();
   assert(StVT.getVectorElementType() == ValEltVT);
+
+  if (!StVT.isPow2VectorType()) {
+    Align = 1; // Force unaligned store of widen vector
+  }
 
   int Idx = 0;          // current index to store
   unsigned Offset = 0;  // offset from base to store
