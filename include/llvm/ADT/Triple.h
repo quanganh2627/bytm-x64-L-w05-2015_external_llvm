@@ -46,6 +46,7 @@ public:
     UnknownArch,
 
     arm,     // ARM: arm, armv.*, xscale
+    usc,     // USC: powervr
     aarch64, // AArch64: aarch64
     hexagon, // Hexagon: hexagon
     mips,    // MIPS: mips, mipsallegrex
@@ -78,6 +79,7 @@ public:
     Apple,
     PC,
     SCEI,
+    IMG,
     BGP,
     BGQ,
     Freescale,
@@ -121,6 +123,7 @@ public:
     GNUX32,
     EABI,
     MachO,
+    POWERVR,
     Android,
     ELF
   };
