@@ -42,7 +42,6 @@ const char *Triple::getArchTypeName(ArchType Kind) {
   case nvptx64: return "nvptx64";
   case le32:    return "le32";
   case amdil:   return "amdil";
-  case usc:     return "usc";
   }
 
   llvm_unreachable("Invalid ArchType!");
@@ -84,7 +83,6 @@ const char *Triple::getArchTypePrefix(ArchType Kind) {
   case nvptx64: return "nvptx";
   case le32:    return "le32";
   case amdil:   return "amdil";
-  case usc:     return "usc";
   }
 }
 
@@ -95,7 +93,6 @@ const char *Triple::getVendorTypeName(VendorType Kind) {
   case Apple: return "apple";
   case PC: return "pc";
   case SCEI: return "scei";
-  case IMG: return "img";
   case BGP: return "bgp";
   case BGQ: return "bgq";
   case Freescale: return "fsl";
@@ -143,7 +140,6 @@ const char *Triple::getEnvironmentTypeName(EnvironmentType Kind) {
   case EABI: return "eabi";
   case MachO: return "macho";
   case Android: return "android";
-  case POWERVR: return "powervr";
   }
 
   llvm_unreachable("Invalid EnvironmentType!");
@@ -175,7 +171,6 @@ Triple::ArchType Triple::getArchTypeForLLVMName(StringRef Name) {
     .Case("nvptx64", nvptx64)
     .Case("le32", le32)
     .Case("amdil", amdil)
-    .Case("usc", usc)
     .Default(UnknownArch);
 }
 
@@ -207,7 +202,6 @@ Triple::ArchType Triple::getArchTypeForDarwinArchName(StringRef Str) {
     .Case("nvptx", Triple::nvptx)
     .Case("nvptx64", Triple::nvptx64)
     .Case("amdil", Triple::amdil)
-    .Case("usc", Triple::usc)
     .Default(Triple::UnknownArch);
 }
 
@@ -232,7 +226,6 @@ const char *Triple::getArchNameForAssembler() {
     .Case("nvptx64", "nvptx64")
     .Case("le32", "le32")
     .Case("amdil", "amdil")
-    .Case("usc", "usc")
     .Default(NULL);
 }
 
@@ -267,7 +260,6 @@ static Triple::ArchType parseArch(StringRef ArchName) {
     .Case("nvptx64", Triple::nvptx64)
     .Case("le32", Triple::le32)
     .Case("amdil", Triple::amdil)
-    .Case("usc", Triple::usc)
     .Default(Triple::UnknownArch);
 }
 
@@ -276,7 +268,6 @@ static Triple::VendorType parseVendor(StringRef VendorName) {
     .Case("apple", Triple::Apple)
     .Case("pc", Triple::PC)
     .Case("scei", Triple::SCEI)
-    .Case("img", Triple::IMG)
     .Case("bgp", Triple::BGP)
     .Case("bgq", Triple::BGQ)
     .Case("fsl", Triple::Freescale)
@@ -317,7 +308,6 @@ static Triple::EnvironmentType parseEnvironment(StringRef EnvironmentName) {
     .StartsWith("gnu", Triple::GNU)
     .StartsWith("macho", Triple::MachO)
     .StartsWith("android", Triple::Android)
-    .StartsWith("powervr", Triple::POWERVR)
     .Default(Triple::UnknownEnvironment);
 }
 
@@ -688,7 +678,6 @@ static unsigned getArchPointerBitWidth(llvm::Triple::ArchType Arch) {
 
   case llvm::Triple::amdil:
   case llvm::Triple::arm:
-  case llvm::Triple::usc:
   case llvm::Triple::cellspu:
   case llvm::Triple::hexagon:
   case llvm::Triple::le32:
@@ -738,7 +727,6 @@ Triple Triple::get32BitArchVariant() const {
 
   case Triple::amdil:
   case Triple::arm:
-  case Triple::usc:
   case Triple::cellspu:
   case Triple::hexagon:
   case Triple::le32:
@@ -781,7 +769,6 @@ Triple Triple::get64BitArchVariant() const {
   case Triple::tce:
   case Triple::thumb:
   case Triple::xcore:
-  case Triple::usc:
     T.setArch(UnknownArch);
     break;
 

@@ -57,12 +57,11 @@ X86MCAsmInfoDarwin::X86MCAsmInfoDarwin(const Triple &T) {
   CommentString = "##";
   PCSymbol = ".";
 
+  SupportsDebugInformation = true;
   DwarfUsesInlineInfoSection = true;
 
-#if !defined(ANDROID_TARGET_BUILD) || defined(ANDROID_ENGINEERING_BUILD)
-  SupportsDebugInformation = true;
-  ExceptionsType = ExceptionHandling::DwarfCFI;  // Exceptions handling
-#endif
+  // Exceptions handling
+  ExceptionsType = ExceptionHandling::DwarfCFI;
 }
 
 X86_64MCAsmInfoDarwin::X86_64MCAsmInfoDarwin(const Triple &Triple)
@@ -86,10 +85,11 @@ X86ELFMCAsmInfo::X86ELFMCAsmInfo(const Triple &T) {
   // Set up DWARF directives
   HasLEB128 = true;  // Target asm supports leb128 directives (little-endian)
 
-#if !defined(ANDROID_TARGET_BUILD) || defined(ANDROID_ENGINEERING_BUILD)
+  // Debug Information
   SupportsDebugInformation = true;
-  ExceptionsType = ExceptionHandling::DwarfCFI;  // Exceptions handling
-#endif
+
+  // Exceptions handling
+  ExceptionsType = ExceptionHandling::DwarfCFI;
 
   // OpenBSD and Bitrig have buggy support for .quad in 32-bit mode, just split
   // into two .words.
@@ -141,7 +141,5 @@ X86MCAsmInfoGNUCOFF::X86MCAsmInfoGNUCOFF(const Triple &Triple) {
   TextAlignFillValue = 0x90;
 
   // Exceptions handling
-#if !defined(ANDROID_TARGET_BUILD) || defined(ANDROID_ENGINEERING_BUILD)
   ExceptionsType = ExceptionHandling::DwarfCFI;
-#endif
 }
