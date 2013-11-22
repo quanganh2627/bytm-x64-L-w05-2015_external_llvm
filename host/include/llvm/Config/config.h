@@ -144,6 +144,14 @@
 /* Define to 1 if you have the `fmodf' function. */
 #define HAVE_FMODF 1
 
+#ifdef __APPLE__
+/* Define to 1 if you have the `futimes' function. */
+#define HAVE_FUTIMES 1
+#else
+/* Define to 1 if you have the `futimens' function. */
+#define HAVE_FUTIMENS 1
+#endif  // __APPLE__
+
 /* Define to 1 if you have the `getcwd' function. */
 #define HAVE_GETCWD 1
 
@@ -455,13 +463,8 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 
-/* Already defined in system/core/include/arch/darwin-x86/AndroidConfig.h */
-#if !defined(HAVE_SYS_UIO_H)
-
 /* Define to 1 if you have the <sys/uio.h> header file. */
-#define HAVE_SYS_UIO_H 1
-
-#endif
+/* #define HAVE_SYS_UIO_H 1 */
 
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 #define HAVE_SYS_WAIT_H 1
@@ -643,7 +646,7 @@
 #define LLVM_VERSION_MAJOR 3
 
 /* Minor version of the LLVM API */
-#define LLVM_VERSION_MINOR 1
+#define LLVM_VERSION_MINOR 3
 
 /* Define if the OS needs help to load dependent libraries for dlopen(). */
 /* #undef LTDL_DLOPEN_DEPLIBS */
