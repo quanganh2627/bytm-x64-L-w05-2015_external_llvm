@@ -1379,25 +1379,22 @@ void DAGTypeLegalizer::WidenVectorResult(SDNode *N, unsigned ResNo) {
   case ISD::BSWAP:
   case ISD::FADD:
   case ISD::FCOPYSIGN:
+  case ISD::FDIV:
   case ISD::FMUL:
   case ISD::FPOW:
+  case ISD::FREM:
   case ISD::FSUB:
   case ISD::MUL:
   case ISD::MULHS:
   case ISD::MULHU:
   case ISD::OR:
+  case ISD::SDIV:
+  case ISD::SREM:
+  case ISD::UDIV:
+  case ISD::UREM:
   case ISD::SUB:
   case ISD::XOR:
     Res = WidenVecRes_Binary(N);
-    break;
-
-  case ISD::FDIV:
-  case ISD::FREM:
-  case ISD::SDIV:
-  case ISD::UDIV:
-  case ISD::SREM:
-  case ISD::UREM:
-    Res = WidenVecRes_BinaryCanTrap(N);
     break;
 
   case ISD::FPOWI:
@@ -1465,15 +1462,6 @@ SDValue DAGTypeLegalizer::WidenVecRes_Ternary(SDNode *N) {
 
 SDValue DAGTypeLegalizer::WidenVecRes_Binary(SDNode *N) {
   // Binary op widening.
-  DebugLoc dl = N->getDebugLoc();
-  EVT WidenVT = TLI.getTypeToTransformTo(*DAG.getContext(), N->getValueType(0));
-  SDValue InOp1 = GetWidenedVector(N->getOperand(0));
-  SDValue InOp2 = GetWidenedVector(N->getOperand(1));
-  return DAG.getNode(N->getOpcode(), dl, WidenVT, InOp1, InOp2);
-}
-
-SDValue DAGTypeLegalizer::WidenVecRes_BinaryCanTrap(SDNode *N) {
-  // Binary op widening for operations that can trap.
   unsigned Opcode = N->getOpcode();
   DebugLoc dl = N->getDebugLoc();
   EVT WidenVT = TLI.getTypeToTransformTo(*DAG.getContext(), N->getValueType(0));
@@ -2467,11 +2455,6 @@ SDValue DAGTypeLegalizer::GenWidenVectorLoads(SmallVector<SDValue, 16> &LdChain,
 
   int LdWidth = LdVT.getSizeInBits();
   int WidthDiff = WidenWidth - LdWidth;          // Difference
-
-  if (!LdVT.isPow2VectorType()) {
-    Align = 1; // Force unaligned load of widen vector
-  }
-
   unsigned LdAlign = (isVolatile) ? 0 : Align; // Allow wider loads
 
   // Find the vector type that can load from.
@@ -2671,10 +2654,6 @@ void DAGTypeLegalizer::GenWidenVectorStores(SmallVector<SDValue, 16>& StChain,
   EVT ValEltVT = ValVT.getVectorElementType();
   unsigned ValEltWidth = ValEltVT.getSizeInBits();
   assert(StVT.getVectorElementType() == ValEltVT);
-
-  if (!StVT.isPow2VectorType()) {
-    Align = 1; // Force unaligned store of widen vector
-  }
 
   int Idx = 0;          // current index to store
   unsigned Offset = 0;  // offset from base to store
