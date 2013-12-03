@@ -12,7 +12,7 @@ let TargetPrefix = "usc" in {  // All intrinsics start with "llvm.usc.".
 	def int_usc_addl:			Intrinsic<[llvm_anyint_ty],		[LLVMMatchType<0>, LLVMMatchType<0>],						[IntrNoMem]>;
 	def int_usc_addsat:        Intrinsic<[llvm_anyint_ty],    [LLVMMatchType<0>, LLVMMatchType<0>],        [IntrNoMem]>;
 	def int_usc_uaddsat:       Intrinsic<[llvm_anyint_ty],    [LLVMMatchType<0>, LLVMMatchType<0>],        [IntrNoMem]>;
-	def int_usc_atan:          Intrinsic<[llvm_anyfloat_ty],  [LLVMMatchType<0>],                          [IntrNoMem]>;
+	def int_usc_atan:          Intrinsic<[llvm_anyfloat_ty],  [LLVMMatchType<0>],                          [IntrNoMem]>;	
 	def int_usc_subh:			Intrinsic<[llvm_anyint_ty],		[LLVMMatchType<0>, LLVMMatchType<0>],						[IntrNoMem]>;
 	def int_usc_subl:			Intrinsic<[llvm_anyint_ty],		[LLVMMatchType<0>, LLVMMatchType<0>],						[IntrNoMem]>;
 	def int_usc_atomicadd:		Intrinsic<[llvm_i32_ty],		[LLVMPointerType<llvm_i32_ty>, llvm_i32_ty],				[IntrReadWriteArgMem]>;
@@ -61,7 +61,7 @@ let TargetPrefix = "usc" in {  // All intrinsics start with "llvm.usc.".
 	def int_usc_umulh:			Intrinsic<[llvm_anyint_ty],		[LLVMMatchType<0>, LLVMMatchType<0>],						[IntrNoMem]>;
 	def int_usc_umull:			Intrinsic<[llvm_anyint_ty],		[LLVMMatchType<0>, LLVMMatchType<0>],						[IntrNoMem]>;
 	def int_usc_subsat:        Intrinsic<[llvm_anyint_ty],    [LLVMMatchType<0>, LLVMMatchType<0>],        [IntrNoMem]>;
-	def int_usc_usubsat:       Intrinsic<[llvm_anyint_ty],    [LLVMMatchType<0>, LLVMMatchType<0>],        [IntrNoMem]>;
+	def int_usc_usubsat:       Intrinsic<[llvm_anyint_ty],    [LLVMMatchType<0>, LLVMMatchType<0>],        [IntrNoMem]>;	
 
 	// RSCompute specific intrinsics used for filter script acceleration of image reads and writes
 	def int_usc_imagestore:		Intrinsic<[],					[llvm_ptr_ty, llvm_anyvector_ty],							[IntrReadWriteArgMem]>;
@@ -70,15 +70,16 @@ let TargetPrefix = "usc" in {  // All intrinsics start with "llvm.usc.".
 	def int_usc_imagedepload:	Intrinsic<[llvm_anyvector_ty],	[llvm_anyint_ty, llvm_anyint_ty, llvm_anyint_ty],			[IntrReadArgMem]>;
 
 	// Work item related intrinsics
-	def int_usc_ugetglobalid:     Intrinsic<[llvm_i32_ty], [llvm_i32_ty], [IntrNoMem]>;
-	def int_usc_ugetglobaloffset: Intrinsic<[llvm_i32_ty], [llvm_i32_ty], [IntrNoMem]>;
-	def int_usc_ugetlocalsize:    Intrinsic<[llvm_i32_ty], [llvm_i32_ty], [IntrNoMem]>;
-	def int_usc_ugetgroupid:      Intrinsic<[llvm_i32_ty], [llvm_i32_ty], [IntrNoMem]>;
-    def int_usc_ugetlocalid:      Intrinsic<[llvm_i32_ty], [llvm_i32_ty], [IntrNoMem]>;
+	def int_usc_ugetglobalsize:		Intrinsic<[llvm_i32_ty],	[llvm_i32_ty],												[IntrNoMem]>;
+	def int_usc_ugetglobalid:		Intrinsic<[llvm_i32_ty],	[llvm_i32_ty],												[IntrNoMem]>;
+	def int_usc_ugetglobaloffset:	Intrinsic<[llvm_i32_ty],	[llvm_i32_ty],												[IntrNoMem]>;
+	def int_usc_ugetlocalsize:		Intrinsic<[llvm_i32_ty],	[llvm_i32_ty],												[IntrNoMem]>;
+	def int_usc_ugetgroupid:		Intrinsic<[llvm_i32_ty],	[llvm_i32_ty],												[IntrNoMem]>;
+	def int_usc_ugetlocalid:		Intrinsic<[llvm_i32_ty],	[llvm_i32_ty],												[IntrNoMem]>;
 
 	// Async memory copy
 	def int_usc_asynccopy: Intrinsic<[llvm_i32_ty], [llvm_anyptr_ty, llvm_anyptr_ty, llvm_i32_ty], [IntrReadWriteArgMem, NoCapture<1>]>;
-
+	
 	// The Saturate intrinsic is special cased: there is no reliable way to indicate that the argument
 	// to the instrinsic must be twice the bit width of the destination, so we have to overload it explicitly
 	def int_usc_dsat32:			Intrinsic<[llvm_i16_ty],		[llvm_i32_ty],												[IntrNoMem]>;
@@ -87,4 +88,23 @@ let TargetPrefix = "usc" in {  // All intrinsics start with "llvm.usc.".
 	def int_usc_usat16:			Intrinsic<[llvm_i8_ty],			[llvm_i16_ty],												[IntrNoMem]>;
 	def int_usc_sat32:			Intrinsic<[llvm_i16_ty],		[llvm_i32_ty],												[IntrNoMem]>;
 	def int_usc_sat16:			Intrinsic<[llvm_i8_ty],		[llvm_i16_ty],												[IntrNoMem]>;
+
+// Describes a burst-store
+	def int_usc_burststore: Intrinsic<[], [llvm_anyptr_ty, llvm_i32_ty, llvm_i32_ty, llvm_anyvector_ty], [IntrReadWriteArgMem, NoCapture<0>]>;
+// Describes a burst-load
+	def int_usc_burstload: Intrinsic<[llvm_anyvector_ty], [llvm_anyptr_ty, llvm_i32_ty, llvm_i32_ty], [IntrReadArgMem, NoCapture<1>]>;
+
+// Local memory aliasing
+	def int_usc_alias: Intrinsic<[llvm_anyvector_ty], [llvm_anyptr_ty], [NoCapture<1>]>;
+
+// Pack: converts a float vector into a i32; the size of the integers is the 2nd argument: 8 or 16
+	def int_usc_pack:  Intrinsic<[llvm_anyint_ty], [llvm_anyfloat_ty, llvm_i32_ty], [IntrNoMem]>;
+	def int_usc_packu: Intrinsic<[llvm_anyint_ty], [llvm_anyfloat_ty, llvm_i32_ty], [IntrNoMem]>;
+
+// Unpack: converts a i32 to a vector of floats; src integer size is the 2nd argument: 8 or 16
+	def int_usc_unpack:  Intrinsic<[llvm_anyfloat_ty], [llvm_anyint_ty, llvm_i32_ty], [IntrNoMem]>;
+	def int_usc_unpacku: Intrinsic<[llvm_anyfloat_ty], [llvm_anyint_ty, llvm_i32_ty], [IntrNoMem]>;
+
+// The intrinsic to mark a local buffer as spilled
+	def int_usc_spill: Intrinsic<[llvm_anyptr_ty], [llvm_anyptr_ty, llvm_i32_ty], [IntrNoMem, NoCapture<1>]>;
 }
